@@ -21,7 +21,7 @@ notrack_tg(struct sk_buff *skb, const struct xt_action_param *par)
 
 	if(likely(tmpl != &nf_ct_untracked_get()->ct_general)){
 		if(nf_ct_is_template(tmpl)){
-			tmpl->status |= IPS_CNTRACK;
+			tmpl->status |= IPS_NOCREATE;
 		}
 	}
 
