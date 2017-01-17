@@ -16,7 +16,7 @@ static unsigned int
 nocreate_tg(struct sk_buff *skb, const struct xt_action_param *par)
 {
 	const struct xt_nocreate_target_info_v1 *info = par->targinfo;
-	struct nf_conn * tmpl = skb->nfctl;
+	struct nf_conn * tmpl = skb->nfct;
 	if (tmpl == NULL) {
 		skb->nfct = &info->ct->ct_general;
 		skb->nfctinfo = IP_CT_NEW;

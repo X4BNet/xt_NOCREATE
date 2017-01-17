@@ -5,5 +5,6 @@
 
 struct xt_nocreate_target_info {
 	struct nf_conn  *ct __attribute__((aligned(8)));
-}
+};
+
 #endif
