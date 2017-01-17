@@ -15,11 +15,11 @@
 static unsigned int
 notrack_tg(struct sk_buff *skb, const struct xt_action_param *par)
 {
-	/* Previously seen (loopback)? Ignore. */
-	if (skb->nfct != NULL)
+	struct nf_conn * tmpl = skb->nfctl;
+	if (tmpl != NULL)
 		return XT_CONTINUE;
 
-	if(skb->nfct != &nf_ct_untracked_get()->ct_general){
+	if(tmpl != &nf_ct_untracked_get()->ct_general){
 		if(nf_ct_is_template(tmpl)){
 			tmpl->status |= IPS_CNTRACK;
 		}
