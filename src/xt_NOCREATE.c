@@ -12,10 +12,6 @@
 #include <net/netfilter/nf_conntrack.h>
 #include "xt_NOCREATE.h"
 
-#ifndef ARRAY_SIZE
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
-#endif
-
 static unsigned int
 nocreate_tg(struct sk_buff *skb, const struct xt_action_param *par)
 {

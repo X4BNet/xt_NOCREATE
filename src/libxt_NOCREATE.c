@@ -8,6 +8,10 @@
 #include <linux/netfilter/nf_conntrack_common.h>
 #include "xt_NOCREATE.h"
 
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#endif
+
 static void ct_help(void)
 {
 	printf(
