@@ -18,7 +18,7 @@ nocreate_tg(struct sk_buff *skb, const struct xt_action_param *par)
 {
 	const struct xt_nocreate_target_info *info = par->targinfo;
 	enum ip_conntrack_info ctinfo;
-	struct nf_conn * tmpl = nfct_get(skb, &ctinfo);
+	struct nf_conn * tmpl = nf_ct_get(skb, &ctinfo);
 	if (tmpl == NULL) {
 		skb->nfct = &info->ct->ct_general;
 		skb->nfctinfo = IP_CT_NEW;
