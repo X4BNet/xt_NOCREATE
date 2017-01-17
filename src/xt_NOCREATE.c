@@ -69,7 +69,7 @@ static void xt_nocreate_tg_destroy(const struct xt_tgdtor_param *par,
 
 static void xt_nocreate_tg_destroy_v0(const struct xt_tgdtor_param *par)
 {
-	struct xt_norrack_target_info *info = par->targinfo;
+	struct xt_nocreate_target_info *info = par->targinfo;
 
 	xt_nocreate_tg_destroy(par, info);
 }
