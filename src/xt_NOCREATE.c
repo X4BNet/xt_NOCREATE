@@ -9,7 +9,6 @@
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv6/ip6_tables.h>
 #include <linux/netfilter/x_tables.h>
-#include <linux/netfilter/nf_conntrack.h>
 #include <net/netfilter/nf_conntrack.h>
 #include "xt_NOCREATE.h"
 
