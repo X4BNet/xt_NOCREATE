@@ -45,7 +45,7 @@ static int nocreate_chk(const struct xt_tgchk_param *par, struct xt_nocreate_tar
 	ct = nf_ct_tmpl_alloc(par->net, &zone, GFP_KERNEL);
 	if (!ct) {
 		ret = -ENOMEM;
-		goto err2;
+		goto err;
 	}
 	
 	__set_bit(IPS_CONFIRMED_BIT, &ct->status);
