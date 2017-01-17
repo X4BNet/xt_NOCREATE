@@ -9,7 +9,8 @@
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv6/ip6_tables.h>
 #include <linux/netfilter/x_tables.h>
-#include <netfilter/nf_conntrack.h>
+#include <linux/netfilter/nf_conntrack.h>
+#include <net/netfilter/nf_conntrack.h>
 #include "xt_NOCREATE.h"
 
 static unsigned int
@@ -75,7 +76,7 @@ static void xt_nocreate_tg_destroy_v0(const struct xt_tgdtor_param *par)
 {
 	struct xt_ct_target_info *info = par->targinfo;
 
-	xt_nocreate_tg_destroy(par, &info);
+	xt_nocreate_tg_destroy(par, info);
 }
 
 static struct xt_target nocreate_tg_reg __read_mostly = {
