@@ -37,11 +37,10 @@ end:
 static int nocreate_chk(const struct xt_tgchk_param *par, struct xt_nocreate_target_info *info)
 {
 	struct nf_conn *ct;
+	struct nf_conntrack_zone zone;
 	int ret = 0;
 	
-	ret = nf_ct_netns_get(par->net, par->family);
-	if (ret < 0)
-		goto err;
+	memset(&zone, 0, sizeof(zone));
 
 	ct = nf_ct_tmpl_alloc(par->net, &zone, GFP_KERNEL);
 	if (!ct) {
@@ -57,8 +56,6 @@ out:
 	info->ct = ct;
 	return 0;
 	
-err2:
-	nf_ct_netns_put(par->net, par->family);
 err:
 	return ret;
 }
@@ -66,14 +63,13 @@ err:
 static void xt_nocreate_tg_destroy(const struct xt_tgdtor_param *par,
 			     struct xt_nocreate_target_info *info)
 {
-	nf_ct_netns_put(par->net, par->family);
 	nf_ct_put(info->ct);
 }
 
 
 static void xt_nocreate_tg_destroy_v0(const struct xt_tgdtor_param *par)
 {
-	struct xt_ct_target_info *info = par->targinfo;
+	struct xt_norrack_target_info *info = par->targinfo;
 
 	xt_nocreate_tg_destroy(par, info);
 }
