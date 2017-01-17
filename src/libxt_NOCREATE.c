@@ -20,6 +20,11 @@ static void ct_help(void)
 	);
 }
 
+
+static void ct_save(const void *ip, const struct xt_entry_target *target)
+{
+}
+
 static struct xtables_target ct_target_reg[] = {
 	{
 		.family        = NFPROTO_UNSPEC,
@@ -27,6 +32,7 @@ static struct xtables_target ct_target_reg[] = {
 		.revision      = 0,
 		.version       = XTABLES_VERSION,
 		.size          = XT_ALIGN(sizeof(struct xt_nocreate_target_info)),
+     	.save		= ct_save,
 		.userspacesize = offsetof(struct xt_nocreate_target_info, ct),
 	}
 };
