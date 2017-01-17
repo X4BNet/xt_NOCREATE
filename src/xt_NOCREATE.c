@@ -81,6 +81,7 @@ static struct xt_target nocreate_tg_reg __read_mostly = {
 	.checkentry	= nocreate_chk,
 	.target		= nocreate_tg,
 	.destroy	= xt_nocreate_tg_destroy_v0,
+	.targetsize     = sizeof(struct xt_nocreate_target_info),
 	.table		= "raw",
 	.me		= THIS_MODULE,
 };
