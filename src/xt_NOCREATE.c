@@ -15,7 +15,7 @@
 static unsigned int
 nocreate_tg(struct sk_buff *skb, const struct xt_action_param *par)
 {
-	const struct xt_nocreate_target_info_v1 *info = par->targinfo;
+	const struct xt_nocreate_target_info *info = par->targinfo;
 	struct nf_conn * tmpl = skb->nfct;
 	if (tmpl == NULL) {
 		skb->nfct = &info->ct->ct_general;
@@ -34,7 +34,7 @@ end:
 	return XT_CONTINUE;
 }
 
-static int nocreate_chk(const struct xt_tgchk_param *par, struct xt_nocreate_target_info_v1 *info)
+static int nocreate_chk(const struct xt_tgchk_param *par, struct xt_nocreate_target_info *info)
 {
 	struct nf_conn *ct;
 	int ret = 0;
@@ -64,7 +64,7 @@ err:
 }
 
 static void xt_nocreate_tg_destroy(const struct xt_tgdtor_param *par,
-			     struct xt_nocreate_target_info_v1 *info)
+			     struct xt_nocreate_target_info *info)
 {
 	nf_ct_netns_put(par->net, par->family);
 	nf_ct_put(info->ct);
