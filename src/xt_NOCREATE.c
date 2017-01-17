@@ -10,7 +10,7 @@
 #include <linux/netfilter_ipv6/ip6_tables.h>
 #include <linux/netfilter/x_tables.h>
 #include <net/netfilter/nf_conntrack.h>
-}
+
 
 static unsigned int
 notrack_tg(struct sk_buff *skb, const struct xt_action_param *par)
@@ -19,7 +19,7 @@ notrack_tg(struct sk_buff *skb, const struct xt_action_param *par)
 	if (tmpl != NULL)
 		return XT_CONTINUE;
 
-	if(tmpl != &nf_ct_untracked_get()->ct_general){
+	if(likely(tmpl != &nf_ct_untracked_get()->ct_general)){
 		if(nf_ct_is_template(tmpl)){
 			tmpl->status |= IPS_CNTRACK;
 		}
