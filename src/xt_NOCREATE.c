@@ -76,6 +76,11 @@ static void xt_nocreate_tg_destroy_v0(const struct xt_tgdtor_param *par)
 	xt_nocreate_tg_destroy(par, info);
 }
 
+
+static void ct_save(const void *ip, const struct xt_entry_target *target)
+{
+}
+
 static struct xt_target nocreate_tg_reg __read_mostly = {
 	.name		= "NOCREATE",
 	.revision	= 0,
@@ -83,6 +88,7 @@ static struct xt_target nocreate_tg_reg __read_mostly = {
 	.checkentry	= nocreate_chk,
 	.target		= nocreate_tg,
 	.destroy	= xt_nocreate_tg_destroy_v0,
+	.save		= ct_save,
 	.targetsize     = sizeof(struct xt_nocreate_target_info),
 	.table		= "raw",
 	.me		= THIS_MODULE,
