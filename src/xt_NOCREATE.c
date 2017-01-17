@@ -10,13 +10,15 @@
 #include <linux/netfilter_ipv6/ip6_tables.h>
 #include <linux/netfilter/x_tables.h>
 #include <net/netfilter/nf_conntrack.h>
+#include <net/netfilter/nf_conntrack_zones.h>
 #include "xt_NOCREATE.h"
 
 static unsigned int
 nocreate_tg(struct sk_buff *skb, const struct xt_action_param *par)
 {
 	const struct xt_nocreate_target_info *info = par->targinfo;
-	struct nf_conn * tmpl = skb->nfct;
+	enum ip_conntrack_info ctinfo;
+	struct nf_conn * tmpl = nfct_get(skb, &ctinfo);
 	if (tmpl == NULL) {
 		skb->nfct = &info->ct->ct_general;
 		skb->nfctinfo = IP_CT_NEW;
@@ -25,7 +27,6 @@ nocreate_tg(struct sk_buff *skb, const struct xt_action_param *par)
 		goto end;
 	}
 
-set:
 	if(nf_ct_is_template(tmpl)){
 		tmpl->status |= IPS_NOCREATE;
 	}
@@ -34,13 +35,15 @@ end:
 	return XT_CONTINUE;
 }
 
-static int nocreate_chk(const struct xt_tgchk_param *par, struct xt_nocreate_target_info *info)
+static int nocreate_chk(const struct xt_tgchk_param *par)
 {
+	struct xt_nocreate_target_info *info = par->targinfo;
 	struct nf_conn *ct;
 	struct nf_conntrack_zone zone;
 	int ret = 0;
 	
 	memset(&zone, 0, sizeof(zone));
+	zone.dir = NF_CT_DEFAULT_ZONE_DIR;
 
 	ct = nf_ct_tmpl_alloc(par->net, &zone, GFP_KERNEL);
 	if (!ct) {
@@ -52,9 +55,8 @@ static int nocreate_chk(const struct xt_tgchk_param *par, struct xt_nocreate_tar
 	__set_bit(IPS_NOCREATE_BIT, &ct->status);
 	
 	nf_conntrack_get(&ct->ct_general);
-out:
+
 	info->ct = ct;
-	return 0;
 	
 err:
 	return ret;
