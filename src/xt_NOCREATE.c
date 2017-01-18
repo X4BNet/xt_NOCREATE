@@ -43,6 +43,10 @@ static int nocreate_chk(const struct xt_tgchk_param *par)
 	struct nf_conntrack_zone zone;
 	int ret = 0;
 	
+	ret = nf_ct_l3proto_try_module_get(par->family);
+    if (ret < 0)
+        goto err1;
+	
 	memset(&zone, 0, sizeof(zone));
 	zone.dir = NF_CT_DEFAULT_ZONE_DIR;
 
@@ -58,8 +62,10 @@ static int nocreate_chk(const struct xt_tgchk_param *par)
 	nf_conntrack_get(&ct->ct_general);
 
 	info->ct = ct;
-	
 err:
+	return ret;
+err1:
+	nf_ct_l3proto_module_put(par->family);
 	return ret;
 }
 
@@ -67,6 +73,7 @@ static void xt_nocreate_tg_destroy(const struct xt_tgdtor_param *par,
 			     struct xt_nocreate_target_info *info)
 {
 	nf_ct_put(info->ct);
+	nf_ct_l3proto_module_put(par->family);
 }
 
 
