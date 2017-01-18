@@ -24,7 +24,7 @@ nocreate_tg(struct sk_buff *skb, const struct xt_action_param *par)
 		skb->nfct = &info->ct->ct_general;
 		skb->nfctinfo = IP_CT_NEW;
 		goto end;
-	} else if(unlikely(tmpl == &nf_ct_untracked_get()->ct_general)) {
+	} else if(unlikely(nf_ct_is_untracked(tmpl))) {
 		goto end;
 	}
 
