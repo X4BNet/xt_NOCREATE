@@ -20,6 +20,7 @@ nocreate_tg(struct sk_buff *skb, const struct xt_action_param *par)
 	enum ip_conntrack_info ctinfo;
 	struct nf_conn * tmpl = nf_ct_get(skb, &ctinfo);
 	if (tmpl == NULL) {
+		atomic_inc(&info->ct->ct_general.use);
 		skb->nfct = &info->ct->ct_general;
 		skb->nfctinfo = IP_CT_NEW;
 		goto end;
