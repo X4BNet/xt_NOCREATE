@@ -43,7 +43,7 @@ libxt_NOCREATE_sh.o: libxt_NOCREATE.c
 
 
 %.so: %_sh.o
-	gcc -shared -o $@ $<
+	gcc -shared -lxtables -o $@ $<
 
 linstall: | libxt_NOCREATE.so
 	@echo " *"
