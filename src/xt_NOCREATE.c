@@ -23,7 +23,7 @@ nocreate_tg(struct sk_buff *skb, const struct xt_action_param *par)
 		info = par->targinfo;
 		atomic_inc(&info->ct->ct_general.use);
 		nf_ct_set(skb, info->ct, IP_CT_NEW);
-	} else if(nf_ct_is_template(tmpl)){
+	} else if(likely(nf_ct_is_template(tmpl))){
 		tmpl->status |= IPS_NOCREATE;
 	}
 
