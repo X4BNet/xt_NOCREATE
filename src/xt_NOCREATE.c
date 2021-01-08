@@ -16,20 +16,17 @@
 static unsigned int
 nocreate_tg(struct sk_buff *skb, const struct xt_action_param *par)
 {
-	const struct xt_nocreate_target_info *info = par->targinfo;
+	const struct xt_nocreate_target_info *info;
 	enum ip_conntrack_info ctinfo;
 	struct nf_conn * tmpl = nf_ct_get(skb, &ctinfo);
 	if (tmpl == NULL) {
+		info = par->targinfo;
 		atomic_inc(&info->ct->ct_general.use);
 		nf_ct_set(skb, info->ct, IP_CT_NEW);
-		goto end;
-	}
-
-	if(nf_ct_is_template(tmpl)){
+	} else if(nf_ct_is_template(tmpl)){
 		tmpl->status |= IPS_NOCREATE;
 	}
 
-end:
 	return XT_CONTINUE;
 }
 
