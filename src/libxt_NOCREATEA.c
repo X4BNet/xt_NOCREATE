@@ -15,7 +15,7 @@
 static void nocreate_help(void)
 {
 	printf(
-"NOCREATE target options:\n"
+"NOCREATEA target options:\n"
 " none\n"
 	);
 }
@@ -28,11 +28,11 @@ static void nocreate_save(const void *ip, const struct xt_entry_target *target)
 static struct xtables_target nocreate_target_reg[] = {
 	{
 		.family        = NFPROTO_UNSPEC,
-		.name          = "NOCREATE",
+		.name          = "NOCREATEA",
 		.revision      = 0,
 		.version       = XTABLES_VERSION,
 		.size          = XT_ALIGN(sizeof(struct xt_nocreate_target_info)),
-     	.save	       = nocreate_save,
+     	.save		   = nocreate_save,
 		.help		   = nocreate_help,
 		.userspacesize = offsetof(struct xt_nocreate_target_info, ct),
 	}

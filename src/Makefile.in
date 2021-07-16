@@ -15,7 +15,7 @@ CC = gcc
 obj-m = xt_NOCREATE.o
 ccflags-y = @KOPTS@
 
-all: xt_NOCREATE.ko libxt_NOCREATE.so
+all: xt_NOCREATE.ko libxt_TCPCREATE.so libxt_NOCREATE.so libxt_NOCREATEA.so
 
 xt_NOCREATE.ko: xt_NOCREATE.c Makefile
 	@echo Compiling for kernel $(KVERSION)
@@ -37,17 +37,25 @@ lclean:
 	-rm -f *.so *_sh.o
 clean: mclean lclean
 	-rm -f *.so *.o modules.order
+
+libxt_TCPCREATE_sh.o: libxt_TCPCREATE.c
+	gcc -O2 -Wall -Wunused $(IPTABLES_CFLAGS) -fPIC -o $@ -c libxt_TCPCREATE.c
 	
 libxt_NOCREATE_sh.o: libxt_NOCREATE.c
 	gcc -O2 -Wall -Wunused $(IPTABLES_CFLAGS) -fPIC -o $@ -c libxt_NOCREATE.c
+	
+libxt_NOCREATEA_sh.o: libxt_NOCREATEA.c
+	gcc -O2 -Wall -Wunused $(IPTABLES_CFLAGS) -fPIC -o $@ -c libxt_NOCREATEA.c
 
 
 %.so: %_sh.o
 	gcc -shared -lxtables -o $@ $<
 
-linstall: | libxt_NOCREATE.so
+linstall: | libxt_NOCREATE.so libxt_NOCREATEA.so libxt_TCPCREATE.so
 	@echo " *"
 	install -D libxt_NOCREATE.so $(DESTDIR)$(IPTABLES_MODULES)/libxt_NOCREATE.so
+	install -D libxt_NOCREATEA.so $(DESTDIR)$(IPTABLES_MODULES)/libxt_NOCREATEA.so
+	install -D libxt_TCPCREATE.so $(DESTDIR)$(IPTABLES_MODULES)/libxt_TCPCREATE.so
 
 dinstall:
 	@echo " *"
