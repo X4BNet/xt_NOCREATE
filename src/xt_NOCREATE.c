@@ -47,13 +47,16 @@ static inline void nf_conntrack_set_tcp_established(struct nf_conn *ct)
 {
 	ct->proto.tcp.state = TCP_CONNTRACK_ESTABLISHED;
 	__set_bit(IPS_ASSURED_BIT, &ct->status);
-	// /__set_bit(IPS_CONFIRMED_BIT, &ct->status);
+	//__set_bit(IPS_CONFIRMED_BIT, &ct->status);
 	//ct->proto.tcp.seen[0].td_maxwin = 0;
 	//ct->proto.tcp.seen[1].td_maxwin = 0;
 
 	
-	ct->proto.tcp.seen[0].flags |= IP_CT_TCP_FLAG_SACK_PERM;
-	ct->proto.tcp.seen[1].flags |= IP_CT_TCP_FLAG_SACK_PERM;
+	ct->proto.tcp.seen[0].flags |= IP_CT_TCP_FLAG_SACK_PERM |
+						IP_CT_TCP_FLAG_BE_LIBERAL;
+
+	ct->proto.tcp.seen[1].flags |= IP_CT_TCP_FLAG_SACK_PERM |
+						IP_CT_TCP_FLAG_BE_LIBERAL;
 
 }
 
@@ -86,28 +89,41 @@ resolve_normal_ct(const struct nf_conntrack_zone *zone,
 }
 
 static unsigned int
-tcpcreate_tg(struct sk_buff *skb, const struct xt_action_param *par){
+tcpcreate_tg_(struct sk_buff *skb, const struct xt_action_param *par, unsigned int result){
 	enum ip_conntrack_info ctinfo;
 	struct nf_conn * ct = nf_ct_get(skb, &ctinfo);
 
 	if(ct == NULL){
+		local_bh_disable();
+
 		ct = resolve_normal_ct(&nf_ct_zone_dflt, skb, xt_family(par), xt_net(par));
 		if(ct != NULL) {
 			if(nf_ct_protonum(ct) == IPPROTO_TCP) {
-				spin_lock_bh(&ct->lock);
+				spin_lock(&ct->lock);
 
 				nf_conntrack_set_tcp_established(ct);
 
+				atomic_inc(&ct->ct_general.use);
 				nf_ct_set(skb, ct, IP_CT_ESTABLISHED);
 
-				spin_unlock_bh(&ct->lock);
-			}else{
-				nf_ct_put(ct);
+				spin_unlock(&ct->lock);
 			}
 		}
+
+		local_bh_enable();
 	}
 
-	return XT_CONTINUE;
+	return result;
+}
+
+static unsigned int
+tcpcreate_tg(struct sk_buff *skb, const struct xt_action_param *par){
+	return tcpcreate_tg_(skb, par, XT_CONTINUE);
+}
+
+static unsigned int
+tcpcreatea_tg(struct sk_buff *skb, const struct xt_action_param *par){
+	return tcpcreate_tg_(skb, par, NF_ACCEPT);
 }
 
 static int nocreate_chk(const struct xt_tgchk_param *par)
@@ -189,6 +205,17 @@ static struct xt_target nocreate_tg_reg[] __read_mostly = {
 		.family		= NFPROTO_UNSPEC,
 		.checkentry	= nocreate_chk,
 		.target		= tcpcreate_tg,
+		.destroy	= xt_nocreate_tg_destroy_v0,
+		.targetsize     = sizeof(struct xt_nocreate_target_info),
+		.table		= "mangle",
+		.me		= THIS_MODULE,
+	},
+	{
+		.name		= "TCPCREATEA",
+		.revision	= 0,
+		.family		= NFPROTO_UNSPEC,
+		.checkentry	= nocreate_chk,
+		.target		= tcpcreatea_tg,
 		.destroy	= xt_nocreate_tg_destroy_v0,
 		.targetsize     = sizeof(struct xt_nocreate_target_info),
 		.table		= "mangle",
