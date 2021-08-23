@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2010 Mathew Heard <mheard@x4b.net>
+ *
+ */
+
 #ifndef XT_NOCREATE_H
 #define XT_NOCREATE_H
 
