@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 Mathew Heard <mheard@x4b.net>
+ * Copyright (c) 2010-2021 Mathew Heard <mheard@x4b.net>
  */
 
 #include <stdio.h>

@@ -5,4 +5,4 @@ not notrack, no create
 Obligatory no waranty implied or provided. Further if you don't understand the risks of patching a kernel do not proceed.
 
 ## License
-Licensed under the Apache 2.0 license, see attached.
+Copyright (c) 2010-2021 Mathew Heard (https://www.x4b.net)

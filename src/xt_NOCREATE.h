@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Mathew Heard <mheard@x4b.net>
+ * Copyright (c) 2021 Mathew Heard <mheard@x4b.net>
  *
  */
 
