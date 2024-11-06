@@ -3,6 +3,7 @@
  *
  */
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/gfp.h>
 #include <linux/skbuff.h>
@@ -24,7 +25,11 @@ nocreate_tg_(struct sk_buff *skb, const struct xt_action_param *par, unsigned in
 	struct nf_conn * tmpl = nf_ct_get(skb, &ctinfo);
 	if (tmpl == NULL) {
 		info = par->targinfo;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,0,0)
 		atomic_inc(&info->ct->ct_general.use);
+#else
+		refcount_inc(&info->ct->ct_general.use);
+#endif
 		nf_ct_set(skb, info->ct, IP_CT_NEW);
 	}
 
@@ -103,7 +108,11 @@ tcpcreate_tg_(struct sk_buff *skb, const struct xt_action_param *par, unsigned i
 
 				nf_conntrack_set_tcp_established(ct);
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,0,0)
 				atomic_inc(&ct->ct_general.use);
+#else
+				refcount_inc(&ct->ct_general.use);
+#endif
 				nf_ct_set(skb, ct, IP_CT_ESTABLISHED);
 
 				spin_unlock(&ct->lock);
