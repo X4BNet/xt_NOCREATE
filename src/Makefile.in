@@ -52,7 +52,7 @@ libxt_NOCREATEA_sh.o: libxt_NOCREATEA.c
 
 
 %.so: %_sh.o
-	gcc -shared -lxtables -o $@ $<
+	gcc -shared -o $@ $< -lxtables
 
 linstall: | libxt_NOCREATE.so libxt_NOCREATEA.so libxt_TCPCREATE.so libxt_TCPCREATEA.so
 	@echo " *"
