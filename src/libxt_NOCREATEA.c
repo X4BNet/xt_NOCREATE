@@ -38,6 +38,9 @@ static struct xtables_target nocreate_target_reg[] = {
 	}
 };
 
+#ifndef _init
+#define _init __attribute__((constructor)) _INIT
+#endif
 void _init(void)
 {
 	xtables_register_targets(nocreate_target_reg, ARRAY_SIZE(nocreate_target_reg));

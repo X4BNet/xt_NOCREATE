@@ -38,6 +38,9 @@ static struct xtables_target tcpcreate_target_reg[] = {
 	}
 };
 
+#ifndef _init
+#define _init __attribute__((constructor)) _INIT
+#endif
 void _init(void)
 {
 	xtables_register_targets(tcpcreate_target_reg, ARRAY_SIZE(tcpcreate_target_reg));
