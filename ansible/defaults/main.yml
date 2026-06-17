@@ -1,0 +1,10 @@
+---
+nocreate_build_dir: /tmp/nocreate_build
+nocreate_repo: https://github.com/X4BNet/xt_NOCREATE.git
+nocreate_version: master
+nocreate_role_version: 11
+nocreate_cleanup: yes
+nocreate_kernels: []
+nocreate_deploy_key_src: ""
+nocreate_deploy_key_content: ""
+nocreate_remote_deploy_key_path: /tmp/xt_NOCREATE/deploy-ro

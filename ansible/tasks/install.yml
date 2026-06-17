@@ -1,0 +1,71 @@
+---
+- name: Remove build directory
+  file:
+    dest: "{{ nocreate_build_dir }}"
+    state: absent
+
+- name: Ensure deploy key directory exists
+  file:
+    dest: /tmp/xt_NOCREATE
+    state: directory
+    mode: "0755"
+  when: nocreate_deploy_key_src | length > 0 or nocreate_deploy_key_content | length > 0
+
+- name: Copy deploy key from controller
+  copy:
+    src: "{{ nocreate_deploy_key_src }}"
+    dest: "{{ nocreate_remote_deploy_key_path }}"
+    mode: "0600"
+  when: nocreate_deploy_key_src | length > 0
+
+- name: Write deploy key from variable
+  copy:
+    content: "{{ nocreate_deploy_key_content }}"
+    dest: "{{ nocreate_remote_deploy_key_path }}"
+    mode: "0600"
+  when: nocreate_deploy_key_content | length > 0
+
+- name: Clone repository with deploy key
+  git:
+    repo: "{{ nocreate_repo }}"
+    dest: "{{ nocreate_build_dir }}"
+    version: "{{ nocreate_resolved_version | default(nocreate_version) }}"
+    accept_hostkey: yes
+    key_file: "{{ nocreate_remote_deploy_key_path }}"
+    recursive: no
+  when: nocreate_deploy_key_src | length > 0 or nocreate_deploy_key_content | length > 0
+
+- name: Clone repository
+  git:
+    repo: "{{ nocreate_repo }}"
+    dest: "{{ nocreate_build_dir }}"
+    version: "{{ nocreate_resolved_version | default(nocreate_version) }}"
+    accept_hostkey: yes
+    recursive: no
+  when: nocreate_deploy_key_src | length == 0 and nocreate_deploy_key_content | length == 0
+
+- name: Clean up deploy key
+  file:
+    path: "{{ nocreate_remote_deploy_key_path }}"
+    state: absent
+  when: nocreate_deploy_key_src | length > 0 or nocreate_deploy_key_content | length > 0
+
+- name: Install module for each kernel version
+  include_tasks: kernel-install.yml
+  with_items: "{{ nocreate_kernels | list | unique }}"
+
+- name: Remove build directory after installation
+  file:
+    dest: "{{ nocreate_build_dir }}"
+    state: absent
+  when: nocreate_cleanup
+
+- name: Ensure ansible directory exists
+  file:
+    dest: /var/ansible
+    state: directory
+
+- name: Update version cache
+  copy:
+    content: "{{ nocreate_resolved_version | default(nocreate_version) }}_{{ nocreate_role_version }}_{{ nocreate_kernels | join(',') }}"
+    dest: /var/ansible/xt_nocreate.cache

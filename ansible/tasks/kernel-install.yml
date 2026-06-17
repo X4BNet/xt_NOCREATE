@@ -1,0 +1,23 @@
+---
+- name: Check if kernel headers exist for {{ item }}
+  stat:
+    path: /lib/modules/{{ item }}
+  register: file_details
+
+- name: Configure module for kernel {{ item }}
+  shell:
+    cmd: bash ./build.sh --configure-only --kver={{ item }}
+    chdir: "{{ nocreate_build_dir }}"
+  when: file_details.stat.exists
+
+- name: Build and install module for kernel {{ item }}
+  shell:
+    cmd: make install KCFLAGS=-O3
+    chdir: "{{ nocreate_build_dir }}/src"
+  when: file_details.stat.exists
+
+- name: Clean build artifacts for kernel {{ item }}
+  shell:
+    cmd: make clean
+    chdir: "{{ nocreate_build_dir }}/src/"
+  when: file_details.stat.exists and nocreate_cleanup

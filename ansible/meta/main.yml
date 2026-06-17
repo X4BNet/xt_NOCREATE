@@ -1,0 +1,17 @@
+---
+galaxy_info:
+  author: X4BNet
+  description: Build and install the xt_NOCREATE kernel module.
+  company: X4B
+  license: GPL-2.0-only
+  min_ansible_version: 2.9
+  platforms:
+    - name: Debian
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+  galaxy_tags: []
+
+dependencies: []

@@ -1,0 +1,47 @@
+---
+- hosts: filtering
+  become: yes
+  tasks:
+    - name: test load
+      shell: modprobe xt_NOCREATE
+
+    - name: test load and unload
+      shell: |
+        set -e
+        for _ in $(seq 1 20); do
+          modprobe xt_NOCREATE
+          rmmod xt_NOCREATE
+        done
+        modprobe xt_NOCREATE
+      args:
+        executable: /bin/bash
+
+    - name: verify xtables targets are registered
+      shell: |
+        set -e
+        iptables -t raw -j NOCREATE -h >/tmp/nocreate-help.txt 2>&1
+        iptables -t raw -j NOCREATEA -h >/tmp/nocreatea-help.txt 2>&1
+        iptables -t mangle -j TCPCREATE -h >/tmp/tcpcreate-help.txt 2>&1
+        iptables -t mangle -j TCPCREATEA -h >/tmp/tcpcreatea-help.txt 2>&1
+      args:
+        executable: /bin/bash
+
+    - name: verify representative rule parsing
+      shell: |
+        set -e
+        iptables -w -t raw -N NOCREATE_CI_RAW
+        iptables -w -t raw -A NOCREATE_CI_RAW -p udp --dport 41000 -j NOCREATE
+        iptables -w -t raw -A NOCREATE_CI_RAW -p udp --dport 41001 -j NOCREATEA
+        iptables -w -t mangle -N NOCREATE_CI_MANGLE
+        iptables -w -t mangle -A NOCREATE_CI_MANGLE -p tcp --dport 42000 -j TCPCREATE
+        iptables -w -t mangle -A NOCREATE_CI_MANGLE -p tcp --dport 42001 -j TCPCREATEA
+        iptables-save | grep -q -- '-j NOCREATE'
+        iptables-save | grep -q -- '-j NOCREATEA'
+        iptables-save | grep -q -- '-j TCPCREATE'
+        iptables-save | grep -q -- '-j TCPCREATEA'
+        iptables -w -t raw -F NOCREATE_CI_RAW
+        iptables -w -t raw -X NOCREATE_CI_RAW
+        iptables -w -t mangle -F NOCREATE_CI_MANGLE
+        iptables -w -t mangle -X NOCREATE_CI_MANGLE
+      args:
+        executable: /bin/bash

@@ -1,0 +1,76 @@
+---
+- name: Install build prerequisites
+  apt:
+    name:
+      - build-essential
+      - git
+      - iptables
+      - libxtables-dev
+      - pkg-config
+    state: present
+
+- name: Create ansible working directory
+  file:
+    dest: /var/ansible
+    state: directory
+
+- name: Create version cache file
+  file:
+    dest: /var/ansible/xt_nocreate.cache
+    state: touch
+  changed_when: false
+
+- name: Read version cache
+  shell: cat /var/ansible/xt_nocreate.cache
+  changed_when: false
+  register: version_cache
+
+- name: Create controller deploy key from content
+  tempfile:
+    state: file
+    prefix: xt_NOCREATE-deploy-
+  delegate_to: localhost
+  become: no
+  register: nocreate_controller_deploy_key
+  when: nocreate_deploy_key_src | length == 0 and nocreate_deploy_key_content | length > 0
+
+- name: Write controller deploy key from content
+  copy:
+    content: "{{ nocreate_deploy_key_content }}"
+    dest: "{{ nocreate_controller_deploy_key.path }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: no
+  when: nocreate_deploy_key_src | length == 0 and nocreate_deploy_key_content | length > 0
+
+- name: Get latest git version from remote
+  delegate_to: localhost
+  become: no
+  shell: |
+    set -e
+    key_path="{{ nocreate_deploy_key_src }}"
+    if [ -z "$key_path" ] && [ -n "{{ (nocreate_controller_deploy_key | default({})).path | default('') }}" ]; then
+      key_path="{{ (nocreate_controller_deploy_key | default({})).path | default('') }}"
+    fi
+    if [ -n "$key_path" ]; then
+      export GIT_SSH_COMMAND="ssh -i $key_path -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+    fi
+    git ls-remote "{{ nocreate_repo }}" "{{ nocreate_version }}" | awk '{ print $1 }'
+  register: _git_version
+  changed_when: false
+
+- name: Remove controller deploy key from content
+  file:
+    path: "{{ nocreate_controller_deploy_key.path }}"
+    state: absent
+  delegate_to: localhost
+  become: no
+  when: nocreate_deploy_key_src | length == 0 and nocreate_deploy_key_content | length > 0
+
+- name: Set NOCREATE resolved version fact
+  set_fact:
+    nocreate_resolved_version: "{{ (_git_version.stdout | trim) | default(nocreate_version, true) }}"
+
+- name: Install NOCREATE module
+  include_tasks: install.yml
+  when: "nocreate_force is defined or version_cache.stdout != nocreate_resolved_version ~ '_' ~ nocreate_role_version ~ '_' ~ (nocreate_kernels | join(','))"

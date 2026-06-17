@@ -1,2 +1,16 @@
 
 .vscode/
+*.swp
+src/Makefile
+src/*.ko
+src/*.so
+src/*.o
+src/*.cmd
+src/.*.o
+src/.*.cmd
+src/.*.o.d
+src/*.mod*
+src/Module.symvers
+src/modules.order
+src/.tmp_versions/
+src/cc-test-build/
