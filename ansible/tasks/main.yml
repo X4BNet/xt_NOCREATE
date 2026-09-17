@@ -3,6 +3,7 @@
   apt:
     name:
       - build-essential
+      - dkms
       - git
       - iptables
       - libxtables-dev

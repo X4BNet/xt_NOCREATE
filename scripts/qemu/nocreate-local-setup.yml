@@ -9,6 +9,7 @@
     - apt:
         name:
           - build-essential
+          - dkms
           - conntrack
           - git
           - iptables
