@@ -63,9 +63,9 @@ linstall: | libxt_NOCREATE.so libxt_NOCREATEA.so libxt_TCPCREATE.so libxt_TCPCRE
 
 dinstall:
 	@echo " *"
-	@./install-dkms.sh --install
+	@KVERSION="$(KVERSION)" ./install-dkms.sh --install
 
-install: minstall linstall
+install: dinstall linstall
 
 uninstall:
 	-rm -f $(DESTDIR)$(IPTABLES_MODULES)/libxt_NOCREATE.so
