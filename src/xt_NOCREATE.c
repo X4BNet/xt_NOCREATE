@@ -252,7 +252,7 @@ module_init(xt_ct_tg_init);
 module_exit(xt_ct_tg_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("Xtables: nocreate target");
+MODULE_DESCRIPTION("Xtables: nocreate target" " (" X4B_GIT_COMMIT ")");
 
 MODULE_ALIAS("ipt_NOCREATE");
 MODULE_ALIAS("ip6t_NOCREATE");
