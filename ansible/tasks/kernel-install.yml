@@ -10,13 +10,13 @@
     chdir: "{{ nocreate_build_dir }}"
   when: file_details.stat.exists
 
-- name: Build, install, and reload module for active kernel {{ item }}
+- name: "Build, install, and reload for active kernel {{ item }}"
   shell:
     cmd: X4B.FW module install NOCREATE NOCREATEA TCPCREATE TCPCREATEA
     chdir: "{{ nocreate_build_dir }}/src"
   when: file_details.stat.exists and item == ansible_kernel
 
-- name: Build and install module for inactive kernel {{ item }}
+- name: "Build and install for inactive kernel {{ item }}"
   shell:
     cmd: make install KCFLAGS=-O3
     chdir: "{{ nocreate_build_dir }}/src"
