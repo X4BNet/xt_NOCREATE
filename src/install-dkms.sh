@@ -18,9 +18,14 @@ if ! command -v dkms >/dev/null 2>&1; then
 fi
 
 MVERSION="$(./version.sh)"
+SOURCE_ROOT="${DKMS_SOURCE_ROOT:-/usr/src}"
+STATE_ROOT="${DKMS_STATE_ROOT:-/var/lib/dkms}"
 declare -A versions=()
-for path in /usr/src/${MODULE_NAME}-*; do
-  [[ -d "$path" ]] && versions["${path#/usr/src/${MODULE_NAME}-}"]=1
+for path in "$SOURCE_ROOT"/${MODULE_NAME}-*; do
+  [[ -d "$path" ]] && versions["${path#"$SOURCE_ROOT/${MODULE_NAME}-"}"]=1
+done
+for path in "$STATE_ROOT"/${MODULE_NAME}/*; do
+  [[ -d "$path" ]] && versions["${path#"$STATE_ROOT/${MODULE_NAME}/"}"]=1
 done
 while IFS= read -r line; do
   version="$(printf '%s' "$line" | sed -n "s#^${MODULE_NAME}[/,[:space:]]*\\([^,[:space:]]*\\).*#\\1#p")"
@@ -33,7 +38,7 @@ for version in "${!versions[@]}"; do
   [[ "$1" == "--install" && "$version" == "$MVERSION" ]] && continue
   echo "! Removing existing ${MODULE_NAME}/$version from DKMS..."
   dkms $nodepmod remove "${MODULE_NAME}/$version" --all || true
-  rm -rf "/usr/src/${MODULE_NAME}-$version"
+  rm -rf "$SOURCE_ROOT/${MODULE_NAME}-$version"
 done
 
 [[ "$1" == "--uninstall" ]] && exit 0
@@ -42,7 +47,10 @@ if [[ -z "$TARGET_KERNEL" ]]; then
   exit 1
 fi
 
-install_root="/usr/src/${MODULE_NAME}-$MVERSION"
+# Remove the target build while its registered source tree still exists.
+dkms $nodepmod remove "${MODULE_NAME}/$MVERSION" -k "$TARGET_KERNEL" >/dev/null 2>&1 || true
+
+install_root="$SOURCE_ROOT/${MODULE_NAME}-$MVERSION"
 rm -rf "$install_root"
 mkdir -p "$install_root"
 cp -a . "$install_root/"
@@ -51,9 +59,12 @@ find "$install_root" -type f \( -name '*.ko' -o -name '*.o' -o -name '*.so' -o -
 printf '%s\n' "$MVERSION" > "$install_root/.module-version"
 touch "$install_root/.automatic"
 
-if ! dkms status "${MODULE_NAME}/$MVERSION" 2>/dev/null | grep -q "^${MODULE_NAME}"; then
+if dkms status "${MODULE_NAME}/$MVERSION" 2>/dev/null | grep -q "^${MODULE_NAME}"; then
+  :
+elif [[ -d "$STATE_ROOT/$MODULE_NAME/$MVERSION" ]]; then
+  echo "! Reusing existing ${MODULE_NAME}/$MVERSION DKMS tree not reported by dkms status."
+else
   dkms add -m "$MODULE_NAME" -v "$MVERSION"
 fi
-dkms $nodepmod remove "${MODULE_NAME}/$MVERSION" -k "$TARGET_KERNEL" >/dev/null 2>&1 || true
 dkms build -m "$MODULE_NAME" -v "$MVERSION" -k "$TARGET_KERNEL"
 dkms install -m "$MODULE_NAME" -v "$MVERSION" -k "$TARGET_KERNEL"
