@@ -17,6 +17,8 @@ Options:
 Environment:
   KERNEL_MODULE_CI_ROOT
                       Path to shared kernel-module-ci checkout. Default: ci/kernel-module-ci, then ../kernel-module-ci
+  KMOD_CI_RTS_ROOT    Optional local xt_RTS checkout. Defaults to ../xt_RTS
+                      when that sibling checkout is present.
   X4B_KERNEL_ARTIFACT_DIR
                       Path to a prebuilt kernel artifact directory. Default: use /runner/kernel cache
   VMIP                Preferred guest IPv4 address; falls back if occupied.
@@ -64,6 +66,10 @@ if [[ ! -x "$REPO_ROOT/build.sh" ]]; then
 fi
 
 SHARED_ROOT="$(resolve_shared_root)"
+
+if [[ -z "${KMOD_CI_RTS_ROOT:-}" && -f "$REPO_ROOT/../xt_RTS/src/xt_RTS.c" ]]; then
+  export KMOD_CI_RTS_ROOT="$REPO_ROOT/../xt_RTS"
+fi
 
 export KMOD_CI_MODULE_NAME="xt-nocreate"
 export KMOD_CI_ENV_NAME="nocreate-local"
