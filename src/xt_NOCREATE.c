@@ -73,10 +73,6 @@ resolve_normal_ct(const struct nf_conntrack_zone *zone,
 {
 	struct nf_conntrack_tuple tuple;
 	struct nf_conntrack_tuple_hash *h;
-	enum ip_conntrack_info ctinfo;
-	struct nf_conntrack_zone tmp;
-	struct nf_conn *ct;
-	u32 hash;
 
 	if (!nf_ct_get_tuplepr(skb, skb_network_offset(skb),
 				 protonum, net,
