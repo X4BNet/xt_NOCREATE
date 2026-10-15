@@ -62,4 +62,4 @@ jobs:
         run: echo '${{ secrets.dockerhub_token }}' | docker login -u x4bnet --password-stdin
 
       - name: Run QEMU tests
-        run: VMIP=${VMIP:-192.168.224.2} ./scripts/test-qemu.sh --skip-local-build
+        run: ./scripts/test-qemu.sh --skip-local-build
